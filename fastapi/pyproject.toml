@@ -2,6 +2,7 @@
 name = "fastapi-labs"
 version = "0.1.0"
 description = ""
+package-mode = false
 authors = [
     {name = "Ittichai Boonyarakthunya",email = "i.boonyarakthunya@gmail.com"}
 ]
@@ -15,7 +16,11 @@ dependencies = [
     "sqlalchemy (>=2.0.41,<3.0.0)",
     "alembic (>=1.16.4,<2.0.0)",
     "asyncpg (>=0.30.0,<0.31.0)",
-    "prisma (>=0.15.0,<0.16.0)"
+    "prisma (>=0.15.0,<0.16.0)",
+    "pydantic-settings (>=2.0.0,<3.0.0)",
+    "python-jose[cryptography] (>=3.3.0,<4.0.0)",
+    "passlib[bcrypt] (>=1.7.4,<2.0.0)",
+    "email-validator (>=2.0.0,<3.0.0)"
 ]
 
 
