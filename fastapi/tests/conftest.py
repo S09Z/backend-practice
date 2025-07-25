@@ -1,36 +1,41 @@
 import pytest
+import pytest_asyncio
 import asyncio
-from httpx import AsyncClient
+import os
+from httpx import AsyncClient, ASGITransport
 from prisma import Prisma
 
 from app.main import app
 
-# Test database URL (use a separate test database)
-TEST_DATABASE_URL = "sqlite:file:./test.db"
+# Use the same PostgreSQL database for tests (you could create a separate test database)
+TEST_DATABASE_URL = os.getenv("DATABASE_URL")
 
 @pytest.fixture(scope="session")
 def event_loop():
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
     yield loop
     loop.close()
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture
 async def test_db():
+    # Set test database URL as environment variable
+    os.environ["DATABASE_URL"] = TEST_DATABASE_URL
+    
     # Use a separate Prisma instance for testing
-    test_prisma = Prisma(datasource={"url": TEST_DATABASE_URL})
+    test_prisma = Prisma()
     await test_prisma.connect()
     
-    # Reset database for testing
-    await test_prisma._execute_raw("PRAGMA foreign_keys = OFF")
+    # Reset database for testing - only clear existing models
     await test_prisma.user.delete_many()
-    await test_prisma.item.delete_many()
-    await test_prisma.auth_token.delete_many()
-    await test_prisma._execute_raw("PRAGMA foreign_keys = ON")
     
     yield test_prisma
     await test_prisma.disconnect()
+    
+    # Clean up - remove any test records if needed
+    pass
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client(test_db):
     # Override the get_db dependency for testing
     from app.database import get_db
@@ -40,13 +45,13 @@ async def client(test_db):
     
     app.dependency_overrides[get_db] = override_get_db
     
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
     
     # Clean up
     app.dependency_overrides.clear()
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def test_user(test_db):
     """Create a test user"""
     from app.controllers.user import user_controller

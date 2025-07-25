@@ -9,7 +9,7 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 class BaseController(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: Type[ModelType]):
         self.model = model
-    
+
     async def get(self, db: Prisma, id: Any) -> Optional[ModelType]:
         """Get a single record by ID"""
         raise NotImplementedError
