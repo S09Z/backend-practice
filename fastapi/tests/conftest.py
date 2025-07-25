@@ -65,3 +65,11 @@ async def test_user(test_db):
     
     user = await user_controller.create(test_db, obj_in=user_data)
     return user
+
+@pytest_asyncio.fixture
+async def auth_headers(test_user):
+    """Create authentication headers for a test user"""
+    from app.core.security import create_access_token
+    
+    access_token = create_access_token(subject=test_user.id)
+    return {"Authorization": f"Bearer {access_token}"}

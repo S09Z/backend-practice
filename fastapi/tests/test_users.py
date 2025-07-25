@@ -1,6 +1,7 @@
 import pytest
 from httpx import AsyncClient
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_create_user(client: AsyncClient):
     user_data = {
@@ -24,6 +25,7 @@ async def test_get_users(client: AsyncClient, test_user):
     # For now, this is a placeholder
     pass
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_duplicate_email(client: AsyncClient):
     user_data = {
